@@ -5,7 +5,7 @@ import example.com.data.repository.skill.SkillRepository
 import org.litote.kmongo.coroutine.CoroutineDatabase
 
 class SkillRepositoryImpl(
-    private val db: CoroutineDatabase
+    db: CoroutineDatabase
 ): SkillRepository {
 
     private val skills = db.getCollection<Skill>()

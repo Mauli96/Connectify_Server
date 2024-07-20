@@ -1,6 +1,7 @@
 package example.com.di
 
 import com.google.gson.Gson
+import example.com.data.models.Skill
 import example.com.data.repository.activity.ActivityRepository
 import example.com.data.repository.activity.ActivityRepositoryImpl
 import example.com.data.repository.chat.ChatRepository
@@ -21,6 +22,8 @@ import example.com.service.*
 import example.com.service.chat.ChatController
 import example.com.service.chat.ChatService
 import example.com.util.Constants
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.koin.dsl.module
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
