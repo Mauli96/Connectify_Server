@@ -26,7 +26,7 @@ interface PostRepository {
     suspend fun getPost(postId: String): Post?
 
     suspend fun getPostDetails(
-        userId: String,
+        ownUserId: String,
         postId: String
     ): PostResponse?
 }

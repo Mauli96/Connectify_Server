@@ -62,7 +62,7 @@ val mainModule = module {
     single { PostService(get()) }
     single { LikeService(get(), get(), get()) }
     single { CommentService(get(), get()) }
-    single { ActivityService(get(), get(), get()) }
+    single { ActivityService(get(), get(), get(), get()) }
     single { SkillService(get()) }
     single { ChatService(get()) }
 

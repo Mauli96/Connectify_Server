@@ -7,6 +7,7 @@ data class Activity(
     val timestamp: Long,
     val byUserId: String,
     val toUserId: String,
+    val username: String,
     val type: Int,
     val parentId: String,
     @BsonId

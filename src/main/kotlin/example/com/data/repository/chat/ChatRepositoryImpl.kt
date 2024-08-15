@@ -15,7 +15,11 @@ class ChatRepositoryImpl(
     private val users = db.getCollection<User>()
     private val messages = db.getCollection<Message>()
 
-    override suspend fun getMessagesForChat(chatId: String, page: Int, pageSize: Int): List<Message> {
+    override suspend fun getMessagesForChat(
+        chatId: String,
+        page: Int,
+        pageSize: Int
+    ): List<Message> {
         return messages.find(Message::chatId eq chatId)
             .skip(page * pageSize)
             .limit(pageSize)
@@ -42,7 +46,10 @@ class ChatRepositoryImpl(
             }
     }
 
-    override suspend fun doesChatBelongToUser(chatId: String, userId: String): Boolean {
+    override suspend fun doesChatBelongToUser(
+        chatId: String,
+        userId: String
+    ): Boolean {
         return chats.findOneById(chatId)?.userIds?.any { it == userId } == true
     }
 

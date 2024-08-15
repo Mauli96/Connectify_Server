@@ -4,6 +4,7 @@ import example.com.data.models.Activity
 import example.com.data.repository.activity.ActivityRepository
 import example.com.data.repository.comment.CommentRepository
 import example.com.data.repository.post.PostRepository
+import example.com.data.repository.user.UserRepository
 import example.com.data.responses.ActivityResponse
 import example.com.data.util.ActivityType
 import example.com.data.util.ParentType
@@ -13,6 +14,7 @@ class ActivityService(
     private val activityRepository: ActivityRepository,
     private val postRepository: PostRepository,
     private val commentRepository: CommentRepository,
+    private val userRepository: UserRepository
 ) {
 
     suspend fun getActivitiesForUser(
@@ -31,11 +33,13 @@ class ActivityService(
         if(byUserId == userIdOfPost) {
             return false
         }
+        val user = userRepository.getUserById(byUserId) ?: return false
         activityRepository.createActivity(
             Activity(
                 timestamp = System.currentTimeMillis(),
                 byUserId = byUserId,
                 toUserId = userIdOfPost,
+                username = user.username,
                 type = ActivityType.CommentedOnPost.type,
                 parentId = postId
             )
@@ -60,11 +64,13 @@ class ActivityService(
         if(byUserId == toUserId) {
             return false
         }
+        val user = userRepository.getUserById(byUserId) ?: return false
         activityRepository.createActivity(
             Activity(
                 timestamp = System.currentTimeMillis(),
                 byUserId = byUserId,
                 toUserId = toUserId,
+                username = user.username,
                 type = when (parentType) {
                     is ParentType.Post -> ActivityType.LikedPost.type
                     is ParentType.Comment -> ActivityType.LikedComment.type

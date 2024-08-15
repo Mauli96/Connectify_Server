@@ -64,7 +64,7 @@ class PostRepositoryImpl(
                 val user = users.findOneById(post.userId)
                 PostResponse(
                     id = post.id,
-                    userId = ownUserId,
+                    userId = post.userId,
                     username = user?.username ?: "",
                     imageUrl = post.imageUrl,
                     profilePictureUrl = user?.profileImageUrl ?: "",
@@ -96,7 +96,7 @@ class PostRepositoryImpl(
                 )) != null
                 PostResponse(
                     id = post.id,
-                    userId = userId,
+                    userId = post.userId,
                     username = user.username,
                     imageUrl = post.imageUrl,
                     profilePictureUrl = user.profileImageUrl,
@@ -114,11 +114,16 @@ class PostRepositoryImpl(
     }
 
     override suspend fun getPostDetails(
-        userId: String,
+        ownUserId: String,
         postId: String
     ): PostResponse? {
-        val isLiked = likes.findOne(Like::userId eq userId) != null
-        val post =  posts.findOneById(postId) ?: return null
+        val isLiked = likes.findOne(
+            and(
+                Like::parentId eq postId,
+                Like::userId eq ownUserId
+            )
+        ) != null
+        val post = posts.findOneById(postId) ?: return null
         val user = users.findOneById(post.userId) ?: return null
         return PostResponse(
             id = post.id,
@@ -130,7 +135,7 @@ class PostRepositoryImpl(
             likeCount = post.likeCount,
             commentCount = post.commentCount,
             isLiked = isLiked,
-            isOwnPost = userId == post.userId
+            isOwnPost = ownUserId == post.userId
         )
     }
 }

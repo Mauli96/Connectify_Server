@@ -11,7 +11,6 @@ class ActivityRepositoryImpl(
     db: CoroutineDatabase
 ) : ActivityRepository {
 
-    private val users = db.getCollection<User>()
     private val activities = db.getCollection<Activity>()
 
     override suspend fun getActivitiesForUser(
@@ -24,15 +23,13 @@ class ActivityRepositoryImpl(
             .limit(pageSize)
             .descendingSort(Activity::timestamp)
             .toList()
-        val userIds = activities.map { it.byUserId }
-        val users = users.find(User::id `in` userIds).toList()
-        return activities.mapIndexed { i, activity ->
+        return activities.map { activity ->
             ActivityResponse(
                 timestamp = activity.timestamp,
                 userId = activity.byUserId,
                 parentId = activity.parentId,
                 type = activity.type,
-                username = users[i].username,
+                username = activity.username,
                 id = activity.id
             )
         }

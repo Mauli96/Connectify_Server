@@ -28,13 +28,16 @@ fun Route.getMessagesForChat(chatService: ChatService) {
             val page = call.parameters[QueryParams.PARAM_PAGE]?.toIntOrNull() ?: 0
             val pageSize = call.parameters[QueryParams.PARAM_PAGE_SIZE]?.toIntOrNull() ?: Constants.DEFAULT_PAGE_SIZE
 
-            if (!chatService.doesChatBelongToUser(chatId, call.userId)) {
+            if(!chatService.doesChatBelongToUser(chatId, call.userId)) {
                 call.respond(HttpStatusCode.Forbidden)
                 return@get
             }
 
             val messages = chatService.getMessagesForChat(chatId, page, pageSize)
-            call.respond(HttpStatusCode.OK, messages)
+            call.respond(
+                HttpStatusCode.OK,
+                messages
+            )
         }
     }
 }
@@ -43,7 +46,10 @@ fun Route.getChatsForUser(chatService: ChatService) {
     authenticate {
         get("/api/chats") {
             val chats = chatService.getChatsForUser(call.userId)
-            call.respond(HttpStatusCode.OK, chats)
+            call.respond(
+                HttpStatusCode.OK,
+                chats
+            )
         }
     }
 }
@@ -56,7 +62,7 @@ fun Route.chatWebSocket(chatController: ChatController) {
             try {
                 incoming.consumeEach { frame ->
                     kotlin.run {
-                        when (frame) {
+                        when(frame) {
                             is Frame.Text -> {
                                 val frameText = frame.readText()
                                 val delimiterIndex = frameText.indexOf("#")
@@ -70,7 +76,7 @@ fun Route.chatWebSocket(chatController: ChatController) {
                                     return@run
                                 }
                                 val json = frameText.substring(delimiterIndex + 1, frameText.length)
-                                handleWebSocket(call.userId, chatController, type, frameText, json)
+                                handleWebSocket(call.userId, chatController, type, json)
                             }
                             else -> Unit
                         }
@@ -90,14 +96,12 @@ suspend fun handleWebSocket(
     ownUserId: String,
     chatController: ChatController,
     type: Int,
-    frameText: String,
     json: String
 ) {
     val gson by inject<Gson>(Gson::class.java)
     when(type) {
         WebSocketObject.MESSAGE.ordinal -> {
             val message = gson.fromJsonOrNull(json, WsClientMessage::class.java) ?: return
-            println("Received message $message from $ownUserId")
             chatController.sendMessage(ownUserId, gson, message)
         }
     }

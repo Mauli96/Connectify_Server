@@ -91,10 +91,7 @@ fun Route.getPostsForProfile(
             )
             call.respond(
                 HttpStatusCode.OK,
-                BasicApiResponse(
-                    successful = true,
-                    data = posts
-                )
+                posts
             )
         }
     }
@@ -112,10 +109,7 @@ fun Route.getPostsForFollows(
             val posts = postService.getPostsForFollows(call.userId, page, pageSize)
             call.respond(
                 HttpStatusCode.OK,
-                BasicApiResponse(
-                    successful = true,
-                    data = posts
-                )
+                posts
             )
         }
     }
@@ -150,21 +144,23 @@ fun Route.deletePost(
 }
 
 fun Route.getPostDetails(postService: PostService) {
-    get("/api/post/details") {
-        val postId = call.parameters[QueryParams.PARAM_POST_ID] ?: kotlin.run {
-            call.respond(HttpStatusCode.BadRequest)
-            return@get
-        }
-        val post = postService.getPostDetails(call.userId, postId) ?: kotlin.run {
-            call.respond(HttpStatusCode.NotFound)
-            return@get
-        }
-        call.respond(
-            HttpStatusCode.OK,
-            BasicApiResponse(
-                successful = true,
-                data = post
+    authenticate {
+        get("/api/post/details") {
+            val postId = call.parameters[QueryParams.PARAM_POST_ID] ?: kotlin.run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+            val post = postService.getPostDetails(call.userId, postId) ?: kotlin.run {
+                call.respond(HttpStatusCode.NotFound)
+                return@get
+            }
+            call.respond(
+                HttpStatusCode.OK,
+                BasicApiResponse(
+                    successful = true,
+                    data = post
+                )
             )
-        )
+        }
     }
 }

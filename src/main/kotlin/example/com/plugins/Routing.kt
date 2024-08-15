@@ -39,7 +39,7 @@ fun Application.configureRouting() {
         updateUserProfile(userService)
 
         // Following routes
-        followUser(followService, activityService)
+        followUser(followService, activityService, userService)
         unfollowUser(followService)
 
         // Post routes

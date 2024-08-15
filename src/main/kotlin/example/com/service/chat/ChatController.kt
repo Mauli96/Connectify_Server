@@ -14,7 +14,10 @@ class ChatController(
 
     private val onlineUsers = ConcurrentHashMap<String, WebSocketSession>()
 
-    fun onJoin(userId: String, socket: WebSocketSession) {
+    fun onJoin(
+        userId: String,
+        socket: WebSocketSession
+    ) {
         onlineUsers[userId] = socket
     }
 
@@ -24,7 +27,11 @@ class ChatController(
         }
     }
 
-    suspend fun sendMessage(ownUserId: String, gson: Gson, message: WsClientMessage) {
+    suspend fun sendMessage(
+        ownUserId: String,
+        gson: Gson,
+        message: WsClientMessage
+    ) {
         val messageEntity = message.toMessage(ownUserId)
         val wsServerMessage = WsServerMessage(
             fromId = ownUserId,
