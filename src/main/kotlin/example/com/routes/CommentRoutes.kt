@@ -1,7 +1,6 @@
 package example.com.routes
 
 import example.com.data.requests.CreateCommentRequest
-import example.com.data.requests.DeleteCommentRequest
 import example.com.data.responses.BasicApiResponse
 import example.com.service.ActivityService
 import example.com.service.CommentService
@@ -26,7 +25,7 @@ fun Route.createComment(
                 return@post
             }
             val userId = call.userId
-            when (commentService.createComment(request, userId)) {
+            when(commentService.createComment(request, userId)) {
                 is CommentService.ValidationEvent.ErrorFieldEmpty -> {
                     call.respond(
                         HttpStatusCode.OK,
@@ -95,32 +94,22 @@ fun Route.deleteComment(
 ) {
     authenticate {
         delete("/api/comment/delete") {
-            val request = call.receiveNullable<DeleteCommentRequest>() ?: kotlin.run {
+            val commentId = call.parameters[QueryParams.PARAM_COMMENT_ID] ?: kotlin.run {
                 call.respond(HttpStatusCode.BadRequest)
                 return@delete
             }
 
-            val comment = commentService.getCommentById(request.commentId)
-            if (comment?.userId != call.userId) {
+            val comment = commentService.getCommentById(commentId)
+            if(comment?.userId != call.userId) {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@delete
             }
-            val deleted = commentService.deleteComment(request.commentId)
-            if (deleted) {
-                likeService.deleteLikesForParent(request.commentId)
-                call.respond(
-                    HttpStatusCode.OK,
-                    BasicApiResponse<Unit>(
-                        successful = true
-                    )
-                )
+            val deleted = commentService.deleteComment(commentId)
+            if(deleted) {
+                likeService.deleteLikesForParent(commentId)
+                call.respond(HttpStatusCode.OK,)
             } else {
-                call.respond(
-                    HttpStatusCode.NotFound,
-                    BasicApiResponse<Unit>(
-                        successful = false
-                    )
-                )
+                call.respond(HttpStatusCode.NotFound)
             }
         }
     }

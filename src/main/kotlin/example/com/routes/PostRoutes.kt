@@ -127,11 +127,11 @@ fun Route.deletePost(
                 return@delete
             }
             val post = postService.getPost(postId)
-            if (post == null) {
+            if(post == null) {
                 call.respond(HttpStatusCode.NotFound)
                 return@delete
             }
-            if (post.userId == call.userId) {
+            if(post.userId == call.userId) {
                 postService.deletePost(postId)
                 likeService.deleteLikesForParent(postId)
                 commentService.deleteCommentsForPost(postId)

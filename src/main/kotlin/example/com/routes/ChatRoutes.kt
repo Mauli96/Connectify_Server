@@ -106,3 +106,27 @@ suspend fun handleWebSocket(
         }
     }
 }
+
+fun Route.deleteChat(chatService: ChatService) {
+    authenticate {
+        delete("/api/chat/delete") {
+            val chatId = call.parameters[QueryParams.PARAM_CHAT_ID] ?: kotlin.run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@delete
+            }
+            val doesChatBelongsToUser = chatService.doesChatBelongToUser(chatId, call.userId)
+
+            if(!doesChatBelongsToUser) {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@delete
+            }
+            val deleted = chatService.deleteChat(chatId)
+            if(deleted) {
+                chatService.deleteMessagesFromChat(chatId)
+                call.respond(HttpStatusCode.OK)
+            } else {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+    }
+}

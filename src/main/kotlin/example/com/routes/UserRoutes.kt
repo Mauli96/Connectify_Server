@@ -25,7 +25,7 @@ fun Route.searchUser(userService: UserService) {
     authenticate {
         get("/api/user/search") {
             val query = call.parameters[QueryParams.PARAM_QUERY]
-            if (query.isNullOrBlank()) {
+            if(query.isNullOrBlank()) {
                 call.respond(
                     HttpStatusCode.OK,
                     listOf<UserResponseItem>()
@@ -45,12 +45,12 @@ fun Route.getUserProfile(userService: UserService) {
     authenticate {
         get("/api/user/profile") {
             val userId = call.parameters[QueryParams.PARAM_USER_ID]
-            if (userId.isNullOrBlank()) {
+            if(userId.isNullOrBlank()) {
                 call.respond(HttpStatusCode.BadRequest)
                 return@get
             }
             val profileResponse = userService.getUserProfile(userId, call.userId)
-            if (profileResponse == null) {
+            if(profileResponse == null) {
                 call.respond(
                     HttpStatusCode.OK,
                     BasicApiResponse<Unit>(
@@ -82,7 +82,7 @@ fun Route.updateUserProfile(userService: UserService) {
             multipart.forEachPart { partData ->
                 when (partData) {
                     is PartData.FormItem -> {
-                        if (partData.name == "update_profile_data") {
+                        if(partData.name == "update_profile_data") {
                             updateProfileRequest = gson.fromJson(
                                 partData.value,
                                 UpdateProfileRequest::class.java
@@ -90,9 +90,9 @@ fun Route.updateUserProfile(userService: UserService) {
                         }
                     }
                     is PartData.FileItem -> {
-                        if (partData.name == "profile_picture") {
+                        if(partData.name == "profile_picture") {
                             profilePictureFileName = partData.save(PROFILE_PICTURE_PATH)
-                        } else if (partData.name == "banner_image") {
+                        } else if(partData.name == "banner_image") {
                             bannerImageFileName = partData.save(BANNER_IMAGE_PATH)
                         }
                     }
@@ -107,7 +107,7 @@ fun Route.updateUserProfile(userService: UserService) {
             updateProfileRequest?.let { request ->
                 val updateAcknowledged = userService.updateUser(
                     userId = call.userId,
-                    profileImageUrl = if (profilePictureFileName == null) {
+                    profileImageUrl = if(profilePictureFileName == null) {
                         null
                     } else {
                         profilePictureUrl
@@ -119,7 +119,7 @@ fun Route.updateUserProfile(userService: UserService) {
                     },
                     updateProfileRequest = request
                 )
-                if (updateAcknowledged) {
+                if(updateAcknowledged) {
                     call.respond(
                         HttpStatusCode.OK,
                         BasicApiResponse<Unit>(

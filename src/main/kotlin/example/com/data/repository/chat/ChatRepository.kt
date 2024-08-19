@@ -35,4 +35,8 @@ interface ChatRepository {
         chatId: String,
         lastMessageId: String
     )
+
+    suspend fun deleteMessagesFromChat(chatId: String)
+
+    suspend fun deleteChat(chatId: String): Boolean
 }

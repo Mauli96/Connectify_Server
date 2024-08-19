@@ -83,4 +83,12 @@ class ChatRepositoryImpl(
     override suspend fun updateLastMessageIdForChat(chatId: String, lastMessageId: String) {
         chats.updateOneById(chatId, setValue(Chat::lastMessageId, lastMessageId))
     }
+
+    override suspend fun deleteMessagesFromChat(chatId: String) {
+        messages.deleteMany(Message::chatId eq chatId)
+    }
+
+    override suspend fun deleteChat(chatId: String): Boolean {
+        return chats.deleteOneById(chatId).wasAcknowledged()
+    }
 }

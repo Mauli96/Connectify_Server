@@ -26,4 +26,12 @@ class ChatService(
     suspend fun getChatsForUser(ownUserId: String): List<ChatDto> {
         return chatRepository.getChatsForUser(ownUserId)
     }
+
+    suspend fun deleteMessagesFromChat(chatId: String) {
+        return chatRepository.deleteMessagesFromChat(chatId)
+    }
+
+    suspend fun deleteChat(chatId: String): Boolean {
+        return chatRepository.deleteChat(chatId)
+    }
 }

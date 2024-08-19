@@ -7,6 +7,7 @@ import example.com.data.responses.CommentResponse
 import org.litote.kmongo.and
 import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.litote.kmongo.eq
+import org.litote.kmongo.inc
 import org.litote.kmongo.setValue
 
 class CommentRepositoryImpl(
@@ -28,6 +29,12 @@ class CommentRepositoryImpl(
     }
 
     override suspend fun deleteComment(commentId: String): Boolean {
+        comments.findOneById(commentId)?.also {
+            posts.updateOneById(
+                it.postId,
+                inc(Post::commentCount, -1)
+            )
+        }
         val deleteCount = comments.deleteOneById(commentId).deletedCount
         return deleteCount > 0
     }
@@ -56,7 +63,8 @@ class CommentRepositoryImpl(
                 timestamp = comment.timestamp,
                 comment = comment.comment,
                 isLiked = isLiked,
-                likeCount = comment.likeCount
+                likeCount = comment.likeCount,
+                isOwnComment = ownUserId == comment.userId
             )
         }
     }
