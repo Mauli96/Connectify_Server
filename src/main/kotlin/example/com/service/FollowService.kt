@@ -1,9 +1,12 @@
 package example.com.service
 
 import example.com.data.repository.follow.FollowRepository
+import example.com.data.repository.user.UserRepository
 import example.com.data.requests.FollowUpdateRequest
+import example.com.data.responses.UserResponseItem
 
 class FollowService(
+    private val userRepository: UserRepository,
     private val followRepository: FollowRepository
 ) {
 
@@ -19,5 +22,21 @@ class FollowService(
             followingUserId,
             followedUserId
         )
+    }
+
+    suspend fun getFollowsByUser(userId: String): List<UserResponseItem> {
+        val followsByUser = followRepository.getFollowsByUser(userId)
+        val followingIds = followsByUser.map { it.followedUserId }
+        val users = userRepository.getUsers(followingIds)
+        return users.map { user ->
+            val isFollowing = followsByUser.find { it.followedUserId == user.id } != null
+            UserResponseItem(
+                userId = user.id,
+                username = user.username,
+                profilePictureUrl = user.profileImageUrl,
+                bio = user.bio,
+                isFollowing = isFollowing
+            )
+        }
     }
 }

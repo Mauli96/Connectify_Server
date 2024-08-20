@@ -34,7 +34,7 @@ class UserService(
             instagramUrl = user.instagramUrl,
             linkedInUrl = user.linkedInUrl,
             isOwnProfile = userId == callerUserId,
-            isFollowing = if (userId != callerUserId) {
+            isFollowing = if(userId != callerUserId) {
                 followRepository.doesUserFollow(callerUserId, userId)
             } else {
                 false

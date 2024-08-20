@@ -58,7 +58,7 @@ val mainModule = module {
         ChatRepositoryImpl(get())
     }
     single { UserService(get(), get()) }
-    single { FollowService(get()) }
+    single { FollowService(get(), get()) }
     single { PostService(get()) }
     single { LikeService(get(), get(), get()) }
     single { CommentService(get(), get()) }
