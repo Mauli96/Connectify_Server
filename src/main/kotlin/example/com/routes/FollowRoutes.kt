@@ -105,3 +105,19 @@ fun Route.getFollowsByUser(followService: FollowService) {
         }
     }
 }
+
+fun Route.getFollowedToUser(followService: FollowService) {
+    authenticate {
+        get("/api/get/followers") {
+            val userId = call.parameters[QueryParams.PARAM_USER_ID] ?: kotlin.run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@get
+            }
+            val usersWhoFollowed = followService.getFollowedToUser(userId)
+            call.respond(
+                HttpStatusCode.OK,
+                usersWhoFollowed
+            )
+        }
+    }
+}
