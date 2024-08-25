@@ -27,6 +27,18 @@ class ChatService(
         return chatRepository.getChatsForUser(ownUserId)
     }
 
+    suspend fun getMessageById(messageId: String): Message? {
+        return chatRepository.getMessageById(messageId)
+    }
+
+    suspend fun deleteMessage(messageId: String): Boolean {
+        val chat = chatRepository.getChatFomLastMessageId(messageId)
+        if(chat?.lastMessageId == messageId) {
+            chatRepository.updateLastMessageIdForChat(chat.id, "66cace8c4bba9401d98db353")
+        }
+        return chatRepository.deleteMessage(messageId)
+    }
+
     suspend fun deleteMessagesFromChat(chatId: String) {
         return chatRepository.deleteMessagesFromChat(chatId)
     }

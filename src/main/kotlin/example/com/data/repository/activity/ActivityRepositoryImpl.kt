@@ -30,6 +30,7 @@ class ActivityRepositoryImpl(
                 parentId = activity.parentId,
                 type = activity.type,
                 username = activity.username,
+                profilePictureUrl = activity.profilePictureUrl,
                 id = activity.id
             )
         }

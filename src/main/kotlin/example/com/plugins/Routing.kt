@@ -71,6 +71,7 @@ fun Application.configureRouting() {
         getMessagesForChat(chatService)
         chatWebSocket(chatController)
         deleteChat(chatService)
+        deleteMessage(chatService)
 
         static {
             resources("static")

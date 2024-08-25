@@ -37,6 +37,7 @@ fun Route.followUser(
                             byUserId = call.userId,
                             toUserId = request.followedUserId,
                             username = user.username,
+                            profilePictureUrl = user.profileImageUrl,
                             type = ActivityType.FollowedUser.type,
                             parentId = ""
                         )

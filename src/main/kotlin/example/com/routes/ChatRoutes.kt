@@ -130,3 +130,27 @@ fun Route.deleteChat(chatService: ChatService) {
         }
     }
 }
+
+fun Route.deleteMessage(chatService: ChatService) {
+    authenticate {
+        delete("/api/chat/message/delete") {
+            val messageId = call.parameters[QueryParams.PARAM_MESSAGE_ID] ?: kotlin.run {
+                call.respond(HttpStatusCode.BadRequest)
+                return@delete
+            }
+            val message = chatService.getMessageById(messageId)
+
+            if(message?.fromId != call.userId) {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@delete
+            }
+            val deleted = chatService.deleteMessage(messageId)
+            if(deleted) {
+                chatService.deleteMessage(messageId)
+                call.respond(HttpStatusCode.OK)
+            } else {
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+    }
+}

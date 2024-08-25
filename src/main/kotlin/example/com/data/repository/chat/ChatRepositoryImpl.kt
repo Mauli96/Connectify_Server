@@ -35,6 +35,7 @@ class ChatRepositoryImpl(
                 val otherUserId = chat.userIds.find { it != ownUserId }
                 val user = users.findOneById(otherUserId ?: "")
                 val message = messages.findOneById(chat.lastMessageId)
+                println("Last message : $message")
                 ChatDto(
                     chatId = chat.id,
                     remoteUserId = user?.id,
@@ -57,7 +58,11 @@ class ChatRepositoryImpl(
         messages.insertOne(message)
     }
 
-    override suspend fun insertChat(userId1: String, userId2: String, messageId: String): String {
+    override suspend fun insertChat(
+        userId1: String,
+        userId2: String,
+        messageId: String
+    ): String {
         val chat = Chat(
             userIds = listOf(
                 userId1,
@@ -71,7 +76,10 @@ class ChatRepositoryImpl(
         return chat.id
     }
 
-    override suspend fun doesChatByUsersExist(userId1: String, userId2: String): Boolean {
+    override suspend fun doesChatByUsersExist(
+        userId1: String,
+        userId2: String
+    ): Boolean {
         return chats.find(
             and(
                 Chat::userIds contains userId1,
@@ -80,8 +88,23 @@ class ChatRepositoryImpl(
         ).first() != null
     }
 
-    override suspend fun updateLastMessageIdForChat(chatId: String, lastMessageId: String) {
+    override suspend fun updateLastMessageIdForChat(
+        chatId: String,
+        lastMessageId: String
+    ) {
         chats.updateOneById(chatId, setValue(Chat::lastMessageId, lastMessageId))
+    }
+
+    override suspend fun getMessageById(messageId: String): Message? {
+        return messages.findOneById(messageId)
+    }
+
+    override suspend fun deleteMessage(messageId: String): Boolean {
+        return messages.deleteOneById(messageId).wasAcknowledged()
+    }
+
+    override suspend fun getChatFomLastMessageId(messageId: String): Chat? {
+        return chats.findOne(Chat::lastMessageId eq messageId)
     }
 
     override suspend fun deleteMessagesFromChat(chatId: String) {

@@ -38,7 +38,8 @@ class ChatController(
             toId = message.toId,
             text = message.text,
             timestamp = System.currentTimeMillis(),
-            chatId = message.chatId
+            chatId = message.chatId,
+            id = messageEntity.id
         )
         val frameText = gson.toJson(wsServerMessage)
         onlineUsers[ownUserId]?.send(Frame.Text("${WebSocketObject.MESSAGE.ordinal}#$frameText"))

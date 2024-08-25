@@ -40,6 +40,7 @@ class ActivityService(
                 byUserId = byUserId,
                 toUserId = userIdOfPost,
                 username = user.username,
+                profilePictureUrl = user.profileImageUrl,
                 type = ActivityType.CommentedOnPost.type,
                 parentId = postId
             )
@@ -71,7 +72,8 @@ class ActivityService(
                 byUserId = byUserId,
                 toUserId = toUserId,
                 username = user.username,
-                type = when (parentType) {
+                profilePictureUrl = user.profileImageUrl,
+                type = when(parentType) {
                     is ParentType.Post -> ActivityType.LikedPost.type
                     is ParentType.Comment -> ActivityType.LikedComment.type
                     else -> ActivityType.LikedPost.type

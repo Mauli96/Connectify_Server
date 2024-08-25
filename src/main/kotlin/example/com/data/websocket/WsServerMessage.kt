@@ -8,6 +8,7 @@ data class WsServerMessage(
     val text: String,
     val timestamp: Long,
     val chatId: String?,
+    val id: String
 ) {
     fun toMessage(): Message {
         return Message(
