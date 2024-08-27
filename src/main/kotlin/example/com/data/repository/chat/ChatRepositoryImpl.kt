@@ -1,7 +1,9 @@
 package example.com.data.repository.chat
 
+import com.mongodb.client.model.Sorts
 import example.com.data.models.Chat
 import example.com.data.models.Message
+import example.com.data.models.Participant
 import example.com.data.models.User
 import example.com.data.responses.ChatDto
 import org.litote.kmongo.*
@@ -14,6 +16,26 @@ class ChatRepositoryImpl(
     private val chats = db.getCollection<Chat>()
     private val users = db.getCollection<User>()
     private val messages = db.getCollection<Message>()
+
+    override suspend fun markUserOnline(userId: String) {
+        chats.updateMany(
+            Chat::participants / Participant::userId eq userId,
+            set(
+                Chat::participants.posOp / Participant::online setTo true,
+                Chat::participants.posOp / Participant::lastSeen setTo System.currentTimeMillis()
+            )
+        )
+    }
+
+    override suspend fun markUserOffline(userId: String) {
+        chats.updateMany(
+            Chat::participants / Participant::userId eq userId,
+            set(
+                Chat::participants.posOp / Participant::online setTo false,
+                Chat::participants.posOp / Participant::lastSeen setTo System.currentTimeMillis()
+            )
+        )
+    }
 
     override suspend fun getMessagesForChat(
         chatId: String,
@@ -28,19 +50,20 @@ class ChatRepositoryImpl(
     }
 
     override suspend fun getChatsForUser(ownUserId: String): List<ChatDto> {
-        return chats.find(Chat::userIds contains ownUserId)
+        return chats.find(Chat::participants elemMatch(Participant::userId eq ownUserId))
             .descendingSort(Chat::timestamp)
             .toList()
             .map { chat ->
-                val otherUserId = chat.userIds.find { it != ownUserId }
-                val user = users.findOneById(otherUserId ?: "")
+                val otherParticipant = chat.participants.find { it.userId != ownUserId }
+                val user = users.findOneById(otherParticipant?.userId ?: "")
                 val message = messages.findOneById(chat.lastMessageId)
-                println("Last message : $message")
                 ChatDto(
                     chatId = chat.id,
                     remoteUserId = user?.id,
                     remoteUsername = user?.username,
                     remoteUserProfilePictureUrl = user?.profileImageUrl,
+                    online = otherParticipant?.online,
+                    lastSeen = otherParticipant?.lastSeen,
                     lastMessage = message?.text,
                     timestamp = message?.timestamp
                 )
@@ -51,7 +74,7 @@ class ChatRepositoryImpl(
         chatId: String,
         userId: String
     ): Boolean {
-        return chats.findOneById(chatId)?.userIds?.any { it == userId } == true
+        return chats.findOneById(chatId)?.participants?.any { it.userId == userId } == true
     }
 
     override suspend fun insertMessage(message: Message) {
@@ -64,9 +87,17 @@ class ChatRepositoryImpl(
         messageId: String
     ): String {
         val chat = Chat(
-            userIds = listOf(
-                userId1,
-                userId2
+            participants = listOf(
+                Participant(
+                    userId = userId1,
+                    online = false,
+                    lastSeen = System.currentTimeMillis()
+                ),
+                Participant(
+                    userId = userId2,
+                    online = false,
+                    lastSeen = System.currentTimeMillis()
+                )
             ),
             lastMessageId = messageId,
             timestamp = System.currentTimeMillis()
@@ -82,8 +113,8 @@ class ChatRepositoryImpl(
     ): Boolean {
         return chats.find(
             and(
-                Chat::userIds contains userId1,
-                Chat::userIds contains userId2
+                Chat::participants elemMatch (Participant::userId eq userId1),
+                Chat::participants elemMatch (Participant::userId eq userId2)
             )
         ).first() != null
     }
@@ -105,6 +136,12 @@ class ChatRepositoryImpl(
 
     override suspend fun getChatFomLastMessageId(messageId: String): Chat? {
         return chats.findOne(Chat::lastMessageId eq messageId)
+    }
+
+    override suspend fun getNewLastMessageId(chatId: String): String? {
+        return messages.find(Message::chatId eq chatId)
+            .sort(Sorts.descending("timestamp"))
+            .first()?.id
     }
 
     override suspend fun deleteMessagesFromChat(chatId: String) {

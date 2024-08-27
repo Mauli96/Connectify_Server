@@ -34,7 +34,12 @@ class ChatService(
     suspend fun deleteMessage(messageId: String): Boolean {
         val chat = chatRepository.getChatFomLastMessageId(messageId)
         if(chat?.lastMessageId == messageId) {
-            chatRepository.updateLastMessageIdForChat(chat.id, "66cace8c4bba9401d98db353")
+            val newLastMessageId = chatRepository.getNewLastMessageId(chat.id)
+            if(newLastMessageId != null) {
+                chatRepository.updateLastMessageIdForChat(chat.id, newLastMessageId)
+            } else {
+                chatRepository.deleteChat(chat.id)
+            }
         }
         return chatRepository.deleteMessage(messageId)
     }

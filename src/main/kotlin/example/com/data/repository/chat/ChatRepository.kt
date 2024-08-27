@@ -6,6 +6,10 @@ import example.com.data.responses.ChatDto
 
 interface ChatRepository {
 
+    suspend fun markUserOnline(userId: String)
+
+    suspend fun markUserOffline(userId: String)
+
     suspend fun getMessagesForChat(
         chatId: String,
         page: Int,
@@ -42,6 +46,8 @@ interface ChatRepository {
     suspend fun deleteMessage(messageId: String): Boolean
 
     suspend fun getChatFomLastMessageId(messageId: String): Chat?
+
+    suspend fun getNewLastMessageId(chatId: String): String?
 
     suspend fun deleteMessagesFromChat(chatId: String)
 

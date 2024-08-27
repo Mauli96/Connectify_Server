@@ -27,6 +27,14 @@ class ChatController(
         }
     }
 
+    suspend fun markUserOnline(userId: String) {
+        repository.markUserOnline(userId)
+    }
+
+    suspend fun markUserOffline(userId: String) {
+        repository.markUserOffline(userId)
+    }
+
     suspend fun sendMessage(
         ownUserId: String,
         gson: Gson,

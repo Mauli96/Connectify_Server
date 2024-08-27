@@ -60,6 +60,7 @@ fun Route.chatWebSocket(chatController: ChatController) {
             println("Connecting via web socket")
             chatController.onJoin(call.userId, this)
             try {
+                chatController.markUserOnline(call.userId)
                 incoming.consumeEach { frame ->
                     kotlin.run {
                         when(frame) {
@@ -87,6 +88,7 @@ fun Route.chatWebSocket(chatController: ChatController) {
             } finally {
                 println("Disconnecting ${call.userId}")
                 chatController.onDisconnect(call.userId)
+                chatController.markUserOffline(call.userId)
             }
         }
     }
