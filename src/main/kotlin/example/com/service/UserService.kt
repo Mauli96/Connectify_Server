@@ -94,6 +94,10 @@ class UserService(
         )
     }
 
+    suspend fun getOwnProfilePicture(userId: String): String? {
+        return userRepository.getOwnProfilePicture(userId)
+    }
+
     fun validateCreateAccountRequest(request: CreateAccountRequest): ValidationEvent {
         if (request.email.isBlank() || request.password.isBlank() || request.username.isBlank()) {
             return ValidationEvent.ErrorFieldEmpty

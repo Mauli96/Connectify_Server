@@ -37,6 +37,7 @@ fun Application.configureRouting() {
         getUserProfile(userService)
         getPostsForProfile(postService)
         updateUserProfile(userService)
+        getOwnProfilePicture(userService)
 
         // Following routes
         followUser(followService, activityService, userService)

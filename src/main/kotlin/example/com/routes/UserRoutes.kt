@@ -137,3 +137,18 @@ fun Route.updateUserProfile(userService: UserService) {
         }
     }
 }
+
+fun Route.getOwnProfilePicture(userService: UserService) {
+    authenticate {
+        get("/api/user/profile/picture") {
+            val profilePictureUrl = userService.getOwnProfilePicture(call.userId)
+            call.respond(
+                HttpStatusCode.OK,
+                BasicApiResponse(
+                    successful = true,
+                    data = profilePictureUrl
+                )
+            )
+        }
+    }
+}

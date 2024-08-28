@@ -77,4 +77,8 @@ class UserRepositoryImpl(
     override suspend fun getUsers(userIds: List<String>): List<User> {
         return users.find(User::id `in` userIds).toList()
     }
+
+    override suspend fun getOwnProfilePicture(userId: String): String? {
+        return users.findOneById(userId)?.profileImageUrl
+    }
 }
