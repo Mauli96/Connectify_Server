@@ -6,6 +6,7 @@ import example.com.service.ActivityService
 import example.com.service.CommentService
 import example.com.service.LikeService
 import example.com.util.ApiResponseMessages
+import example.com.util.CommentFilter
 import example.com.util.QueryParams
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -79,7 +80,10 @@ fun Route.getCommentsForPost(
                 call.respond(HttpStatusCode.BadRequest)
                 return@get
             }
-            val comments = commentService.getCommentsForPost(postId, call.userId)
+            val filterTypeString = call.parameters[QueryParams.FILTER_TYPE]
+            val filterType = CommentFilter.fromValue(filterTypeString ?: "")
+                ?: CommentFilter.MOST_RECENT
+            val comments = commentService.getCommentsForPost(postId, call.userId, filterType)
             call.respond(
                 HttpStatusCode.OK,
                 comments

@@ -2,6 +2,7 @@ package example.com.util
 
 object QueryParams {
 
+    const val FILTER_TYPE = "filterType"
     const val PARAM_CHAT_ID = "chatId"
     const val PARAM_MESSAGE_ID = "messageId"
     const val PARAM_PAGE = "page"

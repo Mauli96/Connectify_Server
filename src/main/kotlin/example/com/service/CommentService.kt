@@ -5,6 +5,7 @@ import example.com.data.repository.comment.CommentRepository
 import example.com.data.repository.user.UserRepository
 import example.com.data.requests.CreateCommentRequest
 import example.com.data.responses.CommentResponse
+import example.com.util.CommentFilter
 import example.com.util.Constants
 
 class CommentService(
@@ -49,9 +50,14 @@ class CommentService(
 
     suspend fun getCommentsForPost(
         postId: String,
-        ownUserId: String
+        ownUserId: String,
+        filterType: CommentFilter
     ): List<CommentResponse> {
-        return commentRepository.getCommentsForPost(postId, ownUserId)
+        return when(filterType) {
+            CommentFilter.MOST_RECENT -> commentRepository.getCommentsByMostRecent(postId, ownUserId)
+            CommentFilter.MOST_OLD -> commentRepository.getCommentsByMostOld(postId, ownUserId)
+            CommentFilter.MOST_POPULAR -> commentRepository.getCommentsByMostPopular(postId, ownUserId)
+        }
     }
 
     suspend fun getCommentById(commentId: String): Comment? {
