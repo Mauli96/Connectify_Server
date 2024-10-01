@@ -1,9 +1,9 @@
 package example.com.data.repository.comment
 
+import com.mongodb.client.model.Sorts
 import example.com.data.models.Comment
 import example.com.data.models.Like
 import example.com.data.models.Post
-import example.com.data.repository.comment.model.CommentWithLikeStatus
 import example.com.data.responses.CommentResponse
 import org.litote.kmongo.and
 import org.litote.kmongo.coroutine.CoroutineDatabase
@@ -29,6 +29,10 @@ class CommentRepositoryImpl(
         return comment.id
     }
 
+    override suspend fun getComment(commentId: String): Comment? {
+        return comments.findOneById(commentId)
+    }
+
     override suspend fun deleteComment(commentId: String): Boolean {
         comments.findOneById(commentId)?.also {
             posts.updateOneById(
@@ -46,72 +50,96 @@ class CommentRepositoryImpl(
         ).wasAcknowledged()
     }
 
-    override suspend fun getCommentsWithStatus(postId: String, ownUserId: String): List<CommentWithLikeStatus> {
-        return comments.find(Comment::postId eq postId).toList().map { comment ->
+    override suspend fun getCommentsByMostRecent(
+        postId: String,
+        ownUserId: String,
+        page: Int,
+        pageSize: Int
+    ): List<CommentResponse> {
+        val commentsCursor = comments.find(Comment::postId eq postId)
+            .sort(Sorts.descending("timestamp"))
+            .skip(page * pageSize)
+            .limit(pageSize)
+            .toList()
+        return commentsCursor.map { comment ->
             val isLiked = likes.findOne(
                 and(
                     Like::userId eq ownUserId,
                     Like::parentId eq comment.id
                 )
             ) != null
-            CommentWithLikeStatus(
-                comment = comment,
+            CommentResponse(
+                id = comment.id,
+                username = comment.username,
+                profilePictureUrl = comment.profileImageUrl,
+                timestamp = comment.timestamp,
+                comment = comment.comment,
                 isLiked = isLiked,
+                likeCount = comment.likeCount,
                 isOwnComment = ownUserId == comment.userId
             )
         }
     }
 
-    override suspend fun getCommentsByMostRecent(postId: String, ownUserId: String): List<CommentResponse> {
-        val comments = getCommentsWithStatus(postId, ownUserId)
-        return comments.map { commentWithStatus ->
+    override suspend fun getCommentsByMostOld(
+        postId: String,
+        ownUserId: String,
+        page: Int,
+        pageSize: Int
+    ): List<CommentResponse> {
+        val commentsCursor = comments.find(Comment::postId eq postId)
+            .sort(Sorts.ascending("timestamp"))
+            .skip(page * pageSize)
+            .limit(pageSize)
+            .toList()
+        return commentsCursor.map { comment ->
+            val isLiked = likes.findOne(
+                and(
+                    Like::userId eq ownUserId,
+                    Like::parentId eq comment.id
+                )
+            ) != null
             CommentResponse(
-                id = commentWithStatus.comment.id,
-                username = commentWithStatus.comment.username,
-                profilePictureUrl = commentWithStatus.comment.profileImageUrl,
-                timestamp = commentWithStatus.comment.timestamp,
-                comment = commentWithStatus.comment.comment,
-                isLiked = commentWithStatus.isLiked,
-                likeCount = commentWithStatus.comment.likeCount,
-                isOwnComment = commentWithStatus.isOwnComment
+                id = comment.id,
+                username = comment.username,
+                profilePictureUrl = comment.profileImageUrl,
+                timestamp = comment.timestamp,
+                comment = comment.comment,
+                isLiked = isLiked,
+                likeCount = comment.likeCount,
+                isOwnComment = ownUserId == comment.userId
             )
-        }.sortedByDescending { it.timestamp }
+        }
     }
 
-    override suspend fun getCommentsByMostOld(postId: String, ownUserId: String): List<CommentResponse> {
-        val comments = getCommentsWithStatus(postId, ownUserId)
-        return comments.map { commentWithStatus ->
+    override suspend fun getCommentsByMostPopular(
+        postId: String,
+        ownUserId: String,
+        page: Int,
+        pageSize: Int
+    ): List<CommentResponse> {
+        val commentsCursor = comments.find(Comment::postId eq postId)
+            .sort(Sorts.descending("likeCount"))
+            .skip(page * pageSize)
+            .limit(pageSize)
+            .toList()
+        return commentsCursor.map { comment ->
+            val isLiked = likes.findOne(
+                and(
+                    Like::userId eq ownUserId,
+                    Like::parentId eq comment.id
+                )
+            ) != null
             CommentResponse(
-                id = commentWithStatus.comment.id,
-                username = commentWithStatus.comment.username,
-                profilePictureUrl = commentWithStatus.comment.profileImageUrl,
-                timestamp = commentWithStatus.comment.timestamp,
-                comment = commentWithStatus.comment.comment,
-                isLiked = commentWithStatus.isLiked,
-                likeCount = commentWithStatus.comment.likeCount,
-                isOwnComment = commentWithStatus.isOwnComment
+                id = comment.id,
+                username = comment.username,
+                profilePictureUrl = comment.profileImageUrl,
+                timestamp = comment.timestamp,
+                comment = comment.comment,
+                isLiked = isLiked,
+                likeCount = comment.likeCount,
+                isOwnComment = ownUserId == comment.userId
             )
-        }.sortedBy { it.timestamp }
-    }
-
-    override suspend fun getCommentsByMostPopular(postId: String, ownUserId: String): List<CommentResponse> {
-        val comments = getCommentsWithStatus(postId, ownUserId)
-        return comments.map { commentWithStatus ->
-            CommentResponse(
-                id = commentWithStatus.comment.id,
-                username = commentWithStatus.comment.username,
-                profilePictureUrl = commentWithStatus.comment.profileImageUrl,
-                timestamp = commentWithStatus.comment.timestamp,
-                comment = commentWithStatus.comment.comment,
-                isLiked = commentWithStatus.isLiked,
-                likeCount = commentWithStatus.comment.likeCount,
-                isOwnComment = commentWithStatus.isOwnComment
-            )
-        }.sortedByDescending { it.likeCount }
-    }
-
-
-    override suspend fun getComment(commentId: String): Comment? {
-        return comments.findOneById(commentId)
+        }
     }
 }

@@ -22,6 +22,6 @@ interface LikeRepository {
     suspend fun getLikesForParent(
         parentId: String,
         page: Int = 0,
-        pageSize: Int = Constants.DEFAULT_ACTIVITY_PAGE_SIZE
+        pageSize: Int = Constants.DEFAULT_PAGE_SIZE
     ): List<Like>
 }

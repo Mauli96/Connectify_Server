@@ -51,12 +51,14 @@ class CommentService(
     suspend fun getCommentsForPost(
         postId: String,
         ownUserId: String,
-        filterType: CommentFilter
+        filterType: CommentFilter,
+        page: Int = 0,
+        pageSize: Int = Constants.DEFAULT_PAGE_SIZE
     ): List<CommentResponse> {
         return when(filterType) {
-            CommentFilter.MOST_RECENT -> commentRepository.getCommentsByMostRecent(postId, ownUserId)
-            CommentFilter.MOST_OLD -> commentRepository.getCommentsByMostOld(postId, ownUserId)
-            CommentFilter.MOST_POPULAR -> commentRepository.getCommentsByMostPopular(postId, ownUserId)
+            CommentFilter.MOST_RECENT -> commentRepository.getCommentsByMostRecent(postId, ownUserId, page, pageSize)
+            CommentFilter.MOST_OLD -> commentRepository.getCommentsByMostOld(postId, ownUserId, page, pageSize)
+            CommentFilter.MOST_POPULAR -> commentRepository.getCommentsByMostPopular(postId, ownUserId, page, pageSize)
         }
     }
 
