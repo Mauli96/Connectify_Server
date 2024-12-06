@@ -26,6 +26,7 @@ import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
 
 val mainModule = module {
+
     val mongoPw = System.getenv("MONGO_PW")
     single {
         val client = KMongo.createClient(
@@ -33,6 +34,7 @@ val mainModule = module {
         ).coroutine
         client.getDatabase(Constants.DATABASE_NAME)
     }
+
     single<UserRepository> {
         UserRepositoryImpl(get())
     }
@@ -57,16 +59,35 @@ val mainModule = module {
     single<ChatRepository> {
         ChatRepositoryImpl(get())
     }
-    single { UserService(get(), get()) }
-    single { FollowService(get(), get()) }
-    single { PostService(get()) }
-    single { LikeService(get(), get(), get()) }
-    single { CommentService(get(), get()) }
-    single { ActivityService(get(), get(), get(), get()) }
-    single { SkillService(get()) }
-    single { ChatService(get()) }
 
-    single { Gson() }
-
-    single { ChatController(get()) }
+    single {
+        UserService(get(), get())
+    }
+    single {
+        FollowService(get(), get())
+    }
+    single {
+        PostService(get())
+    }
+    single {
+        LikeService(get(), get(), get())
+    }
+    single {
+        CommentService(get(), get())
+    }
+    single {
+        ActivityService(get(), get(), get(), get())
+    }
+    single {
+        SkillService(get())
+    }
+    single {
+        ChatService(get())
+    }
+    single {
+        Gson()
+    }
+    single {
+        ChatController(get())
+    }
 }
